@@ -59,9 +59,13 @@ DB_PASSWORD=postgres
 ADMIN_EMAIL=tu-correo-real@dominio.com
 ADMIN_PASSWORD=una-clave-segura-de-8-o-mas-caracteres
 ADMIN_NAME=Tu nombre
+NODE_HOST=localhost
+FACECORE_API_KEY=face_tu_api_key
 ```
 
 `ADMIN_EMAIL` y `ADMIN_PASSWORD` se usan únicamente para crear el primer administrador si todavía no existe. No uses credenciales de ejemplo en producción.
+
+`FACECORE_API_KEY` es la API key del cliente que se crea desde `/admin`. Los archivos PHP la leen desde el entorno del servidor y la envían a Node mediante `Authorization: ApiKey ...`. Nunca la escribas directamente en PHP, JavaScript ni en Git.
 
 Después de iniciar sesión en `/admin`, puedes crear más administradores desde la sección "Administradores". Cada cuenta tiene su propio correo y contraseña y puede desactivarse sin eliminarla.
 
@@ -85,15 +89,29 @@ curl http://localhost:3000/health
 
 ## Ejecutar PHP
 
-Sirve este proyecto desde un servidor PHP local y abre la app.
+Sirve `public/` y `api/php/` desde Apache, XAMPP, Laragon u otro servidor PHP con cURL habilitado. Configura estas variables en el entorno de PHP:
 
-Para una sesión demo de prueba, puedes abrir:
-
-```text
-login_demo.php?usuario_id=1
+```env
+NODE_HOST=localhost
+FACECORE_API_KEY=face_tu_api_key
 ```
 
-Luego accede a `index.html` o `index.php` donde el navegador pueda llamar a `api_registrar.php` y `api_identificar.php`.
+Los wrappers PHP reciben JSON y reenvían las peticiones autenticadas a Node:
+
+- `POST api/php/api_registrar.php`: requiere `usuario_id` y `embedding` o `embeddings`.
+- `POST api/php/api_identificar.php`: requiere `embedding`.
+
+No necesitan `$_SESSION['usuario_id']`; la autenticación entre PHP y Node se realiza con `FACECORE_API_KEY`. La API key debe tener los permisos `face:register` o `face:identify` correspondientes.
+
+Ejemplo de llamada directa al wrapper de registro:
+
+```bash
+curl -X POST http://localhost/faceapp/api/php/api_registrar.php \
+	-H "Content-Type: application/json" \
+	-d '{"usuario_id":42,"embedding":[0.1,0.2]}'
+```
+
+El ejemplo anterior está incompleto deliberadamente: en una petición real el embedding debe contener 128 valores numéricos.
 
 ## Endpoints del microservicio
 
@@ -127,11 +145,6 @@ El acceso facial de administradores usa el mismo umbral conservador y registra e
 
 ## Nota de seguridad
 
-El flujo real debe ejecutarse en un servidor PHP autenticado. La validación de sesión se realiza en:
-
-- `api_registrar.php`
-- `api_identificar.php`
-
-Si no existe `$_SESSION['usuario_id']`, la petición se rechaza con `401`.
+Las rutas Node `POST /api/rostros/registrar` y `POST /api/rostros/identificar` exigen una API key válida mediante `Authorization: ApiKey ...`. Los wrappers PHP también usan esa API key, pero la mantienen únicamente en el entorno del servidor y no la exponen al navegador.
 
 No incluyas API keys directamente en PHP o JavaScript. Usa variables de entorno, por ejemplo `FACECORE_API_KEY`, y revoca las claves que hayan sido expuestas.

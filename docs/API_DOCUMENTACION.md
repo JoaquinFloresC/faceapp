@@ -365,7 +365,7 @@ FACECORE_MAX_DISTANCE=0.60
 
 `FACECORE_API_URL` debe apuntar al despliegue que contiene la versión actual del servidor. Si se usa un dominio remoto, reinicia y despliega allí los cambios; modificar el `server.js` local no actualiza ese dominio.
 
-Los archivos `api/php/api_registrar.php` y `api/php/api_identificar.php` son wrappers para una sesión PHP existente. Si se usan en producción, también deben reenviar una API key mediante el header `Authorization: ApiKey ...`. Nunca escribas la API key directamente en el código fuente; usa `FACECORE_API_KEY` y revoca cualquier key que haya quedado expuesta.
+Los archivos `api/php/api_registrar.php` y `api/php/api_identificar.php` son wrappers PHP que reciben el JSON y reenvían la petición a Node mediante `Authorization: ApiKey ...`. No dependen de una sesión PHP; configuran la key con `FACECORE_API_KEY` en el entorno del servidor. Nunca escribas la API key directamente en el código fuente; usa `FACECORE_API_KEY` y revoca cualquier key que haya quedado expuesta.
 
 ---
 

@@ -1,19 +1,5 @@
 <?php
-session_start();
-
 header('Content-Type: application/json');
-
-$demoMode = isset($_GET['demo']) && $_GET['demo'] === '1';
-$allowDemo = $demoMode || (!empty($_SERVER['HTTP_X_DEMO_SESSION']) && $_SERVER['HTTP_X_DEMO_SESSION'] === '1');
-
-if (!isset($_SESSION['usuario_id']) && !$allowDemo) {
-    http_response_code(401);
-    echo json_encode([
-        'ok' => false,
-        'error' => 'Sesión inválida o no autenticada. Abre login_demo.php?usuario_id=1 antes de usar la captura.'
-    ]);
-    exit;
-}
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
