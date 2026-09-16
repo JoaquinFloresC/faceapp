@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>FaceCore API | Administración</title>
+  <style>
+    :root {
+      --black: #050505;
+      --panel: #111111;
+      --panel-raised: #171717;
+      --panel-soft: #0d0d0d;
+      --line: #292929;
+      --line-strong: #3a3a3a;
+      --text: #f4f4f5;
+      --muted: #99999f;
+      --blue: #d7f36a;
+      --blue-dark: #b8d34d;
+      --green: #d7f36a;
+      --red: #ff5d68;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--black); }
+    * { scrollbar-width: thin; scrollbar-color: #3a3a3a #0b0b0b; }
+    *::-webkit-scrollbar { width: 9px; height: 9px; }
+    *::-webkit-scrollbar-track { background: #0b0b0b; }
+    *::-webkit-scrollbar-thumb { border: 2px solid #0b0b0b; border-radius: 8px; background: #3a3a3a; }
+    *::-webkit-scrollbar-thumb:hover { background: #555; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      overflow-x: hidden;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      background: var(--black);
+      color: var(--text);
+      font-size: 13px;
+      letter-spacing: .01em;
+    }
+    .container {
+      min-height: 100vh;
+      padding: 0;
+    }
+    .hidden { display: none !important; }
+    #loginScreen {
+      width: min(420px, calc(100% - 32px));
+      margin: 15vh auto 0;
+      padding: 30px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, .35);
+    }
+    .login-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 28px; }
+    .login-brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border: 0; border-radius: 9px; background: #d7f36a; color: #17382d; font-size: 22px; font-weight: 700; }
+    .login-brand-name { color: #f4f4f5; font-size: 13px; font-weight: 700; }
+    .login-kicker { margin: 0 0 8px; color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .12em; text-align: center; text-transform: uppercase; }
+    #loginScreen h2 { margin: 0; font-size: 24px; letter-spacing: -.02em; text-align: center; }
+    .login-description { margin: 8px 0 24px; color: var(--muted); line-height: 1.5; text-align: center; }
+    #loginScreen .row { flex-direction: column; }
+    #loginScreen input, #loginScreen button { width: 100%; }
+    #loginScreen button { margin-top: 4px; }
+    .login-field { display: grid; gap: 6px; }
+    .login-field label { color: #c5c5ca; font-size: 11px; }
+    .password-field { position: relative; }
+    .password-field input { padding-right: 62px; }
+    .password-toggle { position: absolute; right: 5px; bottom: 4px; min-height: 27px; width: 30px !important; margin: 0 !important; padding: 4px; border: 0; background: transparent; color: var(--muted); }
+    .password-toggle:hover { background: transparent; color: #fff; }
+    .eye-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+    .face-login-toggle { margin-top: 12px !important; border-color: var(--line-strong); background: transparent; color: #ddd; }
+    .face-login-toggle:hover { background: var(--panel-raised); }
+    .face-box { margin-top: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: #0b0b0b; }
+    .face-video { display: block; width: 100%; max-height: 220px; border-radius: 5px; background: #000; object-fit: cover; }
+    .face-box .row { flex-direction: row !important; margin-top: 8px; }
+    .face-box .row button { width: auto !important; margin-top: 0 !important; }
+    .face-status { min-height: 16px; margin: 8px 0 0; font-size: 10px; }
+    .approval-list { display: grid; gap: 6px; }
+    .approval-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px; border: 1px solid var(--line); border-radius: 5px; background: #101010; }
+    .approval-info { display: grid; gap: 3px; min-width: 0; }
+    .approval-info strong { color: #eee; font-size: 11px; }
+    .approval-info span { color: var(--muted); font-size: 10px; }
+    .approval-item button { flex: 0 0 auto; }
+    .biometric-status { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+    .biometric-actions { align-items: center; }
+    .biometric-actions button { width: auto !important; margin-top: 0 !important; }
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 54px;
+      flex: 0 0 54px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 8px;
+      background: #080808;
+      border-right: 1px solid var(--line);
+    }
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      background: #d7f36a;
+      color: #17382d;
+      font-size: 19px;
+      font-weight: 700;
+    }
+    .side-button {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: #77777d;
+      font-size: 14px;
+    }
+    .side-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
+    .side-button.active, .side-button:hover { border-color: var(--line); background: #171717; color: #fff; }
+    .workspace { min-width: 0; flex: 1; }
+    .topbar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .breadcrumbs { display: flex; align-items: center; color: #e4e4e7; }
+    .brand-link { display: inline-block; min-height: auto; padding: 0; border: 0; background: transparent; color: #e4e4e7; font-size: inherit; font-weight: 600; text-decoration: none; }
+    .brand-link:hover { background: transparent; color: #fff; text-decoration: underline; }
+    .breadcrumbs span { color: var(--muted); margin: 0 7px; }
+    .top-actions { display: flex; align-items: center; gap: 16px; }
+    .top-actions strong { color: #ddd; font-weight: 500; }
+    .user-menu { position: relative; }
+    .user-trigger { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 3px 7px; border: 1px solid transparent; background: transparent; color: #ddd; }
+    .user-trigger:hover, .user-menu.open .user-trigger { border-color: var(--line); background: var(--panel-raised); }
+    .user-avatar { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: #d7f36a; color: #17382d; font-size: 10px; font-weight: 700; }
+    .user-copy { display: grid; gap: 1px; text-align: left; }
+    .user-name { max-width: 150px; overflow: hidden; color: #f2f2f4; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .user-email { max-width: 150px; overflow: hidden; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .user-chevron { color: var(--muted); font-size: 10px; }
+    .user-dropdown { position: absolute; z-index: 10; top: calc(100% + 7px); right: 0; width: 220px; padding: 6px; border: 1px solid var(--line-strong); border-radius: 6px; background: #151515; box-shadow: 0 14px 32px rgba(0, 0, 0, .45); }
+    .user-dropdown.hidden { display: none; }
+    .profile-summary { padding: 9px; border-bottom: 1px solid var(--line); }
+    .profile-summary strong, .profile-summary span { display: block; }
+    .profile-summary strong { color: #f4f4f5; font-size: 12px; }
+    .profile-summary span { margin-top: 3px; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+    .menu-item { width: 100%; display: block; min-height: 31px; padding: 7px 9px; border: 0; border-radius: 4px; background: transparent; color: #ddd; text-align: left; font-size: 11px; font-weight: 500; }
+    .menu-item:hover { background: #242424; }
+    .menu-item.danger { color: #ff9da4; }
+    .content {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 24px 28px 48px;
+    }
+    .page-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+    .eyebrow { margin: 0 0 7px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; }
+    h1 { margin: 0; font-size: 25px; letter-spacing: -.02em; }
+    h2 { margin: 0; font-size: 14px; font-weight: 600; }
+    .subtle { color: var(--muted); }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel);
+    }
+    .stat { min-height: 82px; padding: 15px; border-right: 1px solid var(--line); }
+    .stat:last-child { border-right: 0; }
+    .stat-label { color: var(--muted); font-size: 11px; }
+    .stat-value { display: block; margin-top: 9px; font-size: 22px; font-weight: 600; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.red { color: var(--red); }
+    .stat-detail { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .route-method { display: inline-block; min-width: 52px; padding: 4px 7px; border-radius: 4px; background: rgba(215, 243, 106, .14); color: #d7f36a; font-size: 10px; font-weight: 700; text-align: center; }
+    .route-path { color: #f0f0f2; font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; }
+    .card {
+      margin-bottom: 16px;
+      padding: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .card-header .subtle { font-size: 11px; }
+    .admin-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); gap: 16px; }
+    .admin-grid > .card { min-width: 0; }
+    .new-client-card { order: -3; grid-column: 1 / -1; }
+    .clients-card { order: -2; grid-column: 1 / -1; }
+    .admins-card { order: 0; grid-column: 1 / -1; }
+    .key-box { order: 1; grid-column: 1 / -1; }
+    .audit-card { order: 2; grid-column: 1 / -1; }
+    .routes-card { order: -2; grid-column: 1 / -1; }
+    .form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 8px; }
+    .client-form-grid { grid-template-columns: 1.1fr 1.1fr 1fr auto; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    input, button, select {
+      min-height: 34px;
+      padding: 8px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      background: var(--panel-soft);
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(215, 243, 106, .15); }
+    button { cursor: pointer; border-color: var(--blue); background: var(--blue-dark); color: #17382d; font-weight: 600; }
+    button:hover { background: var(--blue); }
+    button.secondary { border-color: #d7f36a; background: #17382d; color: #d7f36a; }
+    button.secondary:hover { background: #245640; }
+    .toolbar-button { background: transparent; border-color: var(--line-strong); color: #ddd; }
+    .toolbar-button:hover { background: var(--panel-raised); }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { padding: 11px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; background: #151515; }
+    td { color: #dedee2; }
+    tr:last-child td { border-bottom: 0; }
+    td button { min-height: 28px; padding: 5px 8px; font-size: 11px; }
+    .action-group { display: flex; flex-wrap: wrap; gap: 6px; min-width: 142px; }
+    .action-group button { white-space: nowrap; }
+    .action-primary { border-color: #d7f36a; background: #b8d34d; color: #17382d; }
+    .action-muted { border-color: var(--line-strong); background: #202020; color: #d7d7da; }
+    .action-danger { border-color: #8f3941; background: rgba(143, 57, 65, .3); color: #ff9da4; }
+    .face-action-message { display: block; min-height: 14px; margin-top: 4px; color: var(--green); font-size: 10px; }
+    .key-list { display: grid; gap: 6px; min-width: 180px; }
+    .key-item { border: 1px solid var(--line-strong); border-radius: 5px; background: #0d1118; }
+    .key-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 8px; cursor: pointer; }
+    .key-heading::-webkit-details-marker { display: none; }
+    .key-heading::before { content: "+"; width: 14px; color: var(--muted); font-weight: 700; }
+    .key-item[open] .key-heading::before { content: "-"; }
+    .key-details { padding: 0 8px 8px; }
+    .permission-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
+    .permission { padding: 2px 4px; border: 1px solid #71852e; border-radius: 3px; color: #d7f36a; background: rgba(215, 243, 106, .12); font-size: 9px; white-space: nowrap; }
+    .status { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; }
+    .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .status-active { color: var(--green); }
+    .status-inactive, .status-revoked { color: var(--red); }
+    .status-pill { display: inline-block; padding: 4px 8px; border-radius: 999px; background: rgba(215, 243, 106, .12); color: var(--green); font-size: 11px; }
+    pre { max-height: 360px; margin: 14px 0 0; padding: 13px; overflow: auto; border: 1px solid var(--line); border-radius: 5px; background: #080808; color: #b8bbc2; white-space: pre-wrap; }
+    p { color: var(--muted); }
+    #loginMessage, #adminMessage, #clientMessage { min-height: 18px; margin: 10px 0 0; }
+    .key-box { margin-bottom: 0; }
+    .key-box > .row { align-items: stretch; }
+    .key-box input, .key-box select { flex: 1 1 220px; }
+    .footer { padding: 20px 0 0; color: #65656a; font-size: 11px; }
+    .panel-hidden { display: none !important; }
+    @media (max-width: 820px) {
+      .content { padding: 18px 14px 34px; }
+      .admin-grid, .form-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(2) { border-right: 0; }
+      .stat:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
+      .page-heading { align-items: flex-start; flex-direction: column; }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+    @media (max-width: 520px) {
+      .sidebar { width: 44px; flex-basis: 44px; padding-inline: 5px; }
+      .topbar { padding: 0 12px; }
+      .top-actions strong { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loginScreen" class="card">
+      <div class="login-brand"><span class="login-brand-mark">✦</span><span class="login-brand-name">FaceCore API</span></div>
+      <p class="login-kicker">Centro de administración</p>
+      <h2>Acceso a la API</h2>
+      <p class="login-description">Gestiona clientes y credenciales de integración.</p>
+      <div class="row">
+        <div class="login-field"><label for="loginEmail">Correo electrónico</label><input id="loginEmail" type="email" placeholder="correo@dominio.com" autocomplete="username" /></div>
+        <div class="login-field password-field"><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" placeholder="Tu contraseña" autocomplete="current-password" /><button id="passwordToggle" class="password-toggle" type="button" title="Mostrar contraseña" aria-label="Mostrar contraseña"><svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg></button></div>
+        <button id="loginBtn">Entrar</button>
+      </div>
+      <div id="faceLoginBox" class="face-box hidden">
+        <video id="faceLoginVideo" class="face-video" autoplay muted playsinline></video>
+        <div class="row"><button id="faceLoginBtn" type="button">Verificar rostro</button><button id="manualApprovalBtn" class="toolbar-button" type="button">Solicitar aprobación manual</button><button id="faceLoginCancel" class="toolbar-button" type="button">Cancelar</button></div>
+        <p id="faceLoginStatus" class="face-status">Este dispositivo necesita una verificación facial.</p>
+      </div>
+      <p id="loginMessage"></p>
+    </div>
+
+    <div id="adminScreen" class="hidden">
+      <div class="app-layout">
+        <aside class="sidebar" aria-label="Navegación principal">
+          <div class="brand-mark">✦</div>
+          <button class="side-button active" data-panel="overview" title="Resumen" aria-label="Resumen"><svg class="side-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+          <button class="side-button" data-panel="clients" title="Clientes" aria-label="Clientes"><svg class="side-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
+          <button class="side-button" data-panel="routes" title="Rutas" aria-label="Rutas"><svg class="side-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h4a4 4 0 0 1 4 4v2a4 4 0 0 0 4 4h0"/></svg></button>
+          <button class="side-button" data-panel="admins" title="Administradores" aria-label="Administradores"><svg class="side-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/><path d="M19 8h3M20.5 6.5v3"/></svg></button>
+          <button class="side-button" data-panel="keys" title="API keys" aria-label="API keys"><svg class="side-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8 3 3-2 2 2 2-3 3-2-2-3 3"/></svg></button>
+          <button class="side-button" data-panel="audit" title="Auditoría" aria-label="Auditoría"><svg class="side-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></button>
+        </aside>
+
+        <main class="workspace">
+          <header class="topbar">
+            <div class="breadcrumbs"><a href="/admin#overview" class="brand-link" title="Ir al resumen">FaceCore API</a><span>/</span><span id="breadcrumbSection">Resumen</span></div>
+            <div class="top-actions">
+              <div class="user-menu" id="userMenu">
+                <button id="userTrigger" class="user-trigger" aria-haspopup="true" aria-expanded="false">
+                  <span id="userAvatar" class="user-avatar">A</span>
+                  <span class="user-copy"><span id="userName" class="user-name">Administrador</span><span id="userEmail" class="user-email">-</span></span>
+                  <span class="user-chevron">▾</span>
+                </button>
+                <div id="userDropdown" class="user-dropdown hidden">
+                  <div class="profile-summary"><strong id="profileName">Administrador</strong><span id="profileEmail">-</span></div>
+                  <button id="profileSettingsBtn" class="menu-item">Configuración de perfil</button>
+                  <button id="logoutBtn" class="menu-item danger">Cerrar sesión</button>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <div class="content">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">Panel de control</p>
+                <h1 id="pageTitle">Resumen</h1>
+              </div>
+              <span class="subtle">Sesión administrativa activa</span>
+            </div>
+
+            <section class="stats dashboard-panel" data-panel-content="overview" aria-label="Métricas">
+              <div class="stat"><span class="stat-label">Clientes activos</span><strong class="stat-value" id="activeClientCount">-</strong><span class="stat-detail">Cuentas operativas</span></div>
+              <div class="stat"><span class="stat-label">Clientes registrados</span><strong class="stat-value" id="clientCount">-</strong><span class="stat-detail">Total de cuentas</span></div>
+              <div class="stat"><span class="stat-label">API keys activas</span><strong class="stat-value" id="keyCount">-</strong></div>
+              <div class="stat"><span class="stat-label">Estado del servicio</span><strong class="stat-value" id="serviceStatus">-</strong><span class="stat-detail" id="serviceDetail">Comprobando conexión...</span></div>
+            </section>
+
+            <div class="admin-grid">
+      <div class="card admins-card dashboard-panel panel-hidden" data-panel-content="admins">
+        <div class="card-header"><h2>Cuentas de acceso</h2><span class="subtle"><strong id="adminCount">-</strong> activas</span></div>
+        <div class="form-grid">
+          <input id="adminFullName" type="text" placeholder="Nombre completo" />
+          <input id="adminEmail" type="email" placeholder="correo@dominio.com" />
+          <input id="adminPassword" type="password" placeholder="Contraseña (mínimo 8 caracteres)" />
+          <button id="createAdminBtn" class="secondary">Agregar administrador</button>
+        </div>
+        <p id="adminMessage"></p>
+        <div class="face-box">
+          <div class="card-header"><h2>Solicitudes de acceso</h2><button id="refreshApprovalsBtn" class="toolbar-button" type="button">Actualizar</button></div>
+          <p class="subtle">Aprueba dispositivos nuevos desde una sesión ya autorizada.</p>
+          <div id="approvalsList" class="approval-list"><span class="subtle">No hay solicitudes pendientes.</span></div>
+        </div>
+        <div class="face-box">
+          <div class="card-header"><h2>Segundo factor de autenticación</h2><span class="subtle">Verificación biométrica para dispositivos nuevos</span></div>
+          <div class="biometric-status"><span id="biometricIndicator" class="status status-inactive">No registrado</span><span id="biometricUpdated" class="subtle">No hay datos biométricos guardados.</span></div>
+          <div class="row biometric-actions">
+            <button id="enrollFaceBtn" class="toolbar-button" type="button">Registrar rostro</button>
+            <button id="deleteFaceBtn" class="action-danger" type="button" disabled>Eliminar datos</button>
+          </div>
+          <video id="enrollFaceVideo" class="face-video hidden" autoplay muted playsinline></video>
+          <p id="enrollFaceStatus" class="face-status"></p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="adminsTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card new-client-card dashboard-panel panel-hidden" data-panel-content="clients">
+        <div class="card-header"><h2>Nuevo cliente</h2><span class="subtle">Añade una cuenta para consumir la API</span></div>
+        <div class="form-grid client-form-grid">
+          <input id="clientName" type="text" placeholder="Nombre del cliente" />
+          <input id="clientEmail" type="email" placeholder="email@cliente.com" />
+          <input id="clientCompany" type="text" placeholder="Empresa" />
+          <button id="createClientBtn" class="secondary">Crear cliente</button>
+        </div>
+        <p id="clientMessage"></p>
+      </div>
+
+      <div class="card clients-card dashboard-panel panel-hidden" data-panel-content="clients">
+        <div class="card-header"><h2>Clientes</h2><button id="refreshClientsBtn" class="toolbar-button">Actualizar</button></div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Empresa</th>
+              <th>Estado</th>
+              <th>Rostros</th>
+              <th>Permisos</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="clientsTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card routes-card dashboard-panel panel-hidden" data-panel-content="routes">
+        <div class="card-header"><h2>Rutas de la API</h2><span class="subtle">Endpoints disponibles en FaceCore API</span></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Método</th>
+              <th>Ruta</th>
+              <th>Uso</th>
+              <th>Autenticación</th>
+            </tr>
+          </thead>
+          <tbody id="routesTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card key-box dashboard-panel panel-hidden" data-panel-content="keys">
+        <div class="card-header"><h2>Generar API key</h2><span class="subtle">Credenciales de integración</span></div>
+        <div class="row">
+          <input id="keyClientId" type="number" placeholder="ID del cliente" />
+          <input id="keyName" type="text" placeholder="Nombre de la key" />
+          <select id="keyScopes">
+            <option value="face:register,face:identify">face:register, face:identify</option>
+            <option value="face:register">Solo registrar</option>
+            <option value="face:identify">Solo identificar</option>
+          </select>
+          <button id="createKeyBtn">Generar key</button>
+        </div>
+        <pre id="keyOutput"></pre>
+      </div>
+
+      <div class="card audit-card dashboard-panel panel-hidden" data-panel-content="audit">
+        <div class="card-header"><h2>Auditoría</h2><button id="refreshAuditBtn" class="toolbar-button">Actualizar logs</button></div>
+        <pre id="auditOutput"></pre>
+      </div>
+            </div>
+            <div class="footer">FaceCore API <span>·</span> Centro de operaciones</div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <script>
+    const loginScreen = document.getElementById('loginScreen');
+    const adminScreen = document.getElementById('adminScreen');
+    const loginMessage = document.getElementById('loginMessage');
+    const clientMessage = document.getElementById('clientMessage');
+    const adminMessage = document.getElementById('adminMessage');
+    const keyOutput = document.getElementById('keyOutput');
+    const auditOutput = document.getElementById('auditOutput');
+    const clientsTableBody = document.getElementById('clientsTableBody');
+    const adminsTableBody = document.getElementById('adminsTableBody');
+    const adminCount = document.getElementById('adminCount');
+    const activeClientCount = document.getElementById('activeClientCount');
+    const clientCount = document.getElementById('clientCount');
+    const keyCount = document.getElementById('keyCount');
+    const serviceStatus = document.getElementById('serviceStatus');
+    const serviceDetail = document.getElementById('serviceDetail');
+    const routesTableBody = document.getElementById('routesTableBody');
+    const approvalsList = document.getElementById('approvalsList');
+    const biometricIndicator = document.getElementById('biometricIndicator');
+    const biometricUpdated = document.getElementById('biometricUpdated');
+    const deleteFaceBtn = document.getElementById('deleteFaceBtn');
+    const pageTitle = document.getElementById('pageTitle');
+    const breadcrumbSection = document.getElementById('breadcrumbSection');
+    const userMenu = document.getElementById('userMenu');
+    const userTrigger = document.getElementById('userTrigger');
+    const userDropdown = document.getElementById('userDropdown');
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    const userAvatar = document.getElementById('userAvatar');
+    const profileName = document.getElementById('profileName');
+    const profileEmail = document.getElementById('profileEmail');
+    const panelButtons = document.querySelectorAll('.side-button[data-panel]');
+    const panelContents = document.querySelectorAll('[data-panel-content]');
+    const panelTitles = {
+      overview: 'Resumen',
+      clients: 'Clientes',
+      routes: 'Rutas',
+      admins: 'Administradores',
+      keys: 'API keys',
+      audit: 'Auditoría'
+    };
+    const appRoutes = [
+      { method: 'GET', path: '/health', description: 'Comprueba el estado de la API y PostgreSQL.', auth: 'Pública' },
+      { method: 'POST', path: '/admin/login', description: 'Inicia la sesión administrativa.', auth: 'Pública' },
+      { method: 'GET', path: '/admin/clients', description: 'Lista clientes y sus API keys.', auth: 'Admin' },
+      { method: 'POST', path: '/admin/clients', description: 'Registra un nuevo cliente.', auth: 'Admin' },
+      { method: 'DELETE', path: '/admin/clients/:id/face-records', description: 'Elimina los registros faciales de un cliente.', auth: 'Admin' },
+      { method: 'PATCH', path: '/admin/clients/:id/status', description: 'Activa o desactiva un cliente.', auth: 'Admin' },
+      { method: 'GET', path: '/admin/users', description: 'Lista las cuentas administradoras.', auth: 'Admin' },
+      { method: 'POST', path: '/admin/users', description: 'Crea una cuenta administradora.', auth: 'Admin' },
+      { method: 'GET', path: '/admin/audit', description: 'Consulta los últimos eventos.', auth: 'Admin' },
+      { method: 'POST', path: '/api/rostros/registrar', description: 'Registra un embedding facial.', auth: 'API key' },
+      { method: 'POST', path: '/api/rostros/identificar', description: 'Identifica un rostro registrado.', auth: 'API key' }
+    ];
+    const scopeLabels = {
+      'face:register': 'Registrar',
+      'face:identify': 'Identificar'
+    };
+    let token = localStorage.getItem('faceapp_admin_token') || '';
+    let faceChallenge = '';
+    let deviceId = localStorage.getItem('faceapp_admin_device_id') || '';
+    if (!deviceId) {
+      deviceId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem('faceapp_admin_device_id', deviceId);
+    }
+    let currentUser = JSON.parse(localStorage.getItem('faceapp_admin_user') || 'null');
+
+    function setCurrentUser(user) {
+      currentUser = user || null;
+      const name = currentUser?.fullName || 'Administrador';
+      const email = currentUser?.email || '-';
+      const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'A';
+      userName.textContent = name;
+      userEmail.textContent = email;
+      userAvatar.textContent = initials;
+      profileName.textContent = name;
+      profileEmail.textContent = email;
+    }
+
+    function closeUserMenu() {
+      userMenu.classList.remove('open');
+      userDropdown.classList.add('hidden');
+      userTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    userTrigger.addEventListener('click', () => {
+      const isOpen = !userDropdown.classList.contains('hidden');
+      userMenu.classList.toggle('open', !isOpen);
+      userDropdown.classList.toggle('hidden', isOpen);
+      userTrigger.setAttribute('aria-expanded', String(!isOpen));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!userMenu.contains(event.target)) closeUserMenu();
+    });
+
+    document.getElementById('profileSettingsBtn').addEventListener('click', () => {
+      closeUserMenu();
+      setPanel('admins');
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        if (token) await apiFetch('/admin/logout', { method: 'POST' });
+      } catch (error) {
+        // La sesión local se limpia aunque el servidor ya no esté disponible.
+      }
+
+      token = '';
+      currentUser = null;
+      localStorage.removeItem('faceapp_admin_token');
+      localStorage.removeItem('faceapp_admin_user');
+      closeUserMenu();
+      setLoggedIn(false);
+      document.getElementById('loginPassword').value = '';
+      loginMessage.textContent = 'Sesión cerrada.';
+    });
+
+    document.getElementById('passwordToggle').addEventListener('click', () => {
+      const passwordInput = document.getElementById('loginPassword');
+      const toggle = document.getElementById('passwordToggle');
+      const isVisible = passwordInput.type === 'text';
+      passwordInput.type = isVisible ? 'password' : 'text';
+      toggle.title = isVisible ? 'Mostrar contraseña' : 'Ocultar contraseña';
+      toggle.setAttribute('aria-label', toggle.title);
+      toggle.innerHTML = isVisible
+        ? '<svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>'
+        : '<svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.5 0 10 6 10 6a18.4 18.4 0 0 1-3.1 3.7M6.2 6.2C3.5 8 2 12 2 12s3.5 6 10 6a10.5 10.5 0 0 0 3.2-.5"/></svg>';
+    });
+
+    setCurrentUser(currentUser);
+
+    const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+    let faceModelsPromise = null;
+    let faceLoginStream = null;
+    let enrollFaceStream = null;
+    let approvalPollTimer = null;
+
+    async function loadFaceModels() {
+      if (!faceModelsPromise) {
+        faceModelsPromise = Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
+        ]);
+      }
+      return faceModelsPromise;
+    }
+
+    async function startFaceCamera(videoElement) {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Este navegador no permite acceder a la cámara.');
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      videoElement.srcObject = stream;
+      await videoElement.play();
+      return stream;
+    }
+
+    function stopFaceCamera(stream, videoElement) {
+      stream?.getTracks().forEach((track) => track.stop());
+      videoElement.srcObject = null;
+    }
+
+    async function captureFaceEmbedding(videoElement) {
+      const detection = await faceapi
+        .detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      if (!detection) throw new Error('No se detectó ningún rostro. Mira a la cámara e inténtalo de nuevo.');
+      return Array.from(detection.descriptor);
+    }
+
+    async function openFaceChallenge(challenge) {
+      faceChallenge = challenge;
+      const box = document.getElementById('faceLoginBox');
+      const status = document.getElementById('faceLoginStatus');
+      box.classList.remove('hidden');
+      status.textContent = 'Preparando cámara para verificar este dispositivo...';
+      await loadFaceModels();
+      faceLoginStream = await startFaceCamera(document.getElementById('faceLoginVideo'));
+      status.textContent = 'Cámara lista. Verifica tu rostro para continuar.';
+    }
+
+    document.getElementById('faceLoginCancel').addEventListener('click', () => {
+      stopFaceCamera(faceLoginStream, document.getElementById('faceLoginVideo'));
+      faceLoginStream = null;
+      faceChallenge = '';
+      document.getElementById('faceLoginBox').classList.add('hidden');
+    });
+
+    document.getElementById('faceLoginBtn').addEventListener('click', async () => {
+      const status = document.getElementById('faceLoginStatus');
+      try {
+        status.textContent = 'Verificando rostro...';
+        const embedding = await captureFaceEmbedding(document.getElementById('faceLoginVideo'));
+        const data = await apiFetch('/admin/face/login', { method: 'POST', body: JSON.stringify({ challenge: faceChallenge, embedding }) });
+        token = data.token;
+        setCurrentUser(data.user);
+        localStorage.setItem('faceapp_admin_token', token);
+        localStorage.setItem('faceapp_admin_user', JSON.stringify(data.user));
+        stopFaceCamera(faceLoginStream, document.getElementById('faceLoginVideo'));
+        faceLoginStream = null;
+        faceChallenge = '';
+        document.getElementById('faceLoginBox').classList.add('hidden');
+        setLoggedIn(true);
+        loadAdmins();
+        loadClients();
+        loadServiceHealth();
+        loadAudit();
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    });
+
+    async function finishDeviceApproval(data) {
+      token = data.token;
+      setCurrentUser(data.user);
+      localStorage.setItem('faceapp_admin_token', token);
+      localStorage.setItem('faceapp_admin_user', JSON.stringify(data.user));
+      stopFaceCamera(faceLoginStream, document.getElementById('faceLoginVideo'));
+      faceLoginStream = null;
+      faceChallenge = '';
+      document.getElementById('faceLoginBox').classList.add('hidden');
+      setLoggedIn(true);
+      loadAdmins();
+      loadClients();
+      loadServiceHealth();
+      loadAudit();
+    }
+
+    document.getElementById('manualApprovalBtn').addEventListener('click', async () => {
+      const status = document.getElementById('faceLoginStatus');
+      if (!faceChallenge) {
+        status.textContent = 'El reto ya no está disponible. Inicia sesión nuevamente.';
+        return;
+      }
+
+      document.getElementById('manualApprovalBtn').disabled = true;
+      status.textContent = 'Solicitud enviada. Apruébala desde otro dispositivo autorizado...';
+
+      const checkApproval = async () => {
+        try {
+          const response = await fetch(`/admin/device-approvals/status?token=${encodeURIComponent(faceChallenge)}`);
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'No se pudo consultar la solicitud.');
+          if (!data.approved) return;
+
+          clearInterval(approvalPollTimer);
+          approvalPollTimer = null;
+          await finishDeviceApproval(data);
+        } catch (error) {
+          clearInterval(approvalPollTimer);
+          approvalPollTimer = null;
+          status.textContent = error.message;
+          document.getElementById('manualApprovalBtn').disabled = false;
+        }
+      };
+
+      await checkApproval();
+      if (faceChallenge && !approvalPollTimer) approvalPollTimer = setInterval(checkApproval, 2000);
+    });
+
+    document.getElementById('enrollFaceBtn').addEventListener('click', async () => {
+      const button = document.getElementById('enrollFaceBtn');
+      const video = document.getElementById('enrollFaceVideo');
+      const status = document.getElementById('enrollFaceStatus');
+      try {
+        if (!enrollFaceStream) {
+          status.textContent = 'Preparando cámara...';
+          await loadFaceModels();
+          enrollFaceStream = await startFaceCamera(video);
+          video.classList.remove('hidden');
+          button.textContent = 'Capturar y actualizar';
+          status.textContent = 'Cámara lista. Mantén el rostro centrado.';
+          return;
+        }
+
+        status.textContent = 'Registrando rostro...';
+        const embedding = await captureFaceEmbedding(video);
+        await apiFetch('/admin/face/enroll', { method: 'POST', body: JSON.stringify({ embedding }) });
+        stopFaceCamera(enrollFaceStream, video);
+        enrollFaceStream = null;
+        video.classList.add('hidden');
+        button.textContent = 'Actualizar rostro';
+        status.textContent = 'Rostro registrado correctamente.';
+        loadBiometricStatus();
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    });
+
+    async function loadBiometricStatus() {
+      try {
+        const data = await apiFetch('/admin/face/status');
+        biometricIndicator.textContent = data.enrolled ? 'Activo' : 'No registrado';
+        biometricIndicator.className = `status ${data.enrolled ? 'status-active' : 'status-inactive'}`;
+        biometricUpdated.textContent = data.updatedAt
+          ? `Actualizado: ${new Date(data.updatedAt).toLocaleString()}`
+          : 'No hay datos biométricos guardados.';
+        deleteFaceBtn.disabled = !data.enrolled;
+        document.getElementById('enrollFaceBtn').textContent = data.enrolled ? 'Actualizar rostro' : 'Registrar rostro';
+      } catch (error) {
+        biometricIndicator.textContent = 'No disponible';
+        biometricIndicator.className = 'status status-inactive';
+        biometricUpdated.textContent = error.message;
+        deleteFaceBtn.disabled = true;
+      }
+    }
+
+    deleteFaceBtn.addEventListener('click', async () => {
+      if (!confirm('¿Eliminar los datos biométricos de tu cuenta?')) return;
+
+      deleteFaceBtn.disabled = true;
+      try {
+        await apiFetch('/admin/face/enroll', { method: 'DELETE' });
+        document.getElementById('enrollFaceStatus').textContent = 'Datos biométricos eliminados.';
+        loadBiometricStatus();
+      } catch (error) {
+        document.getElementById('enrollFaceStatus').textContent = error.message;
+        loadBiometricStatus();
+      }
+    });
+
+    function setPanel(panelName) {
+      panelContents.forEach((panel) => {
+        panel.classList.toggle('panel-hidden', panel.getAttribute('data-panel-content') !== panelName);
+      });
+
+      panelButtons.forEach((button) => {
+        button.classList.toggle('active', button.getAttribute('data-panel') === panelName);
+      });
+
+      pageTitle.textContent = panelTitles[panelName] || panelTitles.overview;
+      breadcrumbSection.textContent = panelTitles[panelName] || panelTitles.overview;
+    }
+
+    panelButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const panelName = button.getAttribute('data-panel');
+        if (window.location.hash.slice(1) === panelName) {
+          setPanel(panelName);
+        } else {
+          window.location.hash = panelName;
+        }
+      });
+    });
+
+    function openKeyGenerator(clientId) {
+      document.getElementById('keyClientId').value = clientId;
+      document.getElementById('keyName').value = 'FaceCore API key';
+      document.getElementById('keyOutput').textContent = '';
+      setPanel('keys');
+      if (window.location.hash.slice(1) !== 'keys') {
+        window.location.hash = 'keys';
+      }
+      document.getElementById('keyName').focus();
+    }
+
+    window.addEventListener('hashchange', () => setPanel(window.location.hash.slice(1) || 'overview'));
+
+    routesTableBody.innerHTML = appRoutes.map((route) => `
+      <tr>
+        <td><span class="route-method">${route.method}</span></td>
+        <td><span class="route-path">${route.path}</span></td>
+        <td>${route.description}</td>
+        <td>${route.auth}</td>
+      </tr>
+    `).join('');
+
+    setPanel(window.location.hash.slice(1) || 'overview');
+
+    function setLoggedIn(isLoggedIn) {
+      loginScreen.classList.toggle('hidden', isLoggedIn);
+      adminScreen.classList.toggle('hidden', !isLoggedIn);
+    }
+
+    if (token) {
+      setLoggedIn(true);
+      loadAdmins();
+      loadBiometricStatus();
+      loadClients();
+      loadServiceHealth();
+      loadAudit();
+    } else {
+      setLoggedIn(false);
+    }
+
+    async function apiFetch(url, options = {}) {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(url, {
+        ...options,
+        cache: 'no-store',
+        headers
+      });
+
+      const text = await response.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
+
+      if (response.status === 401 && token) {
+        token = '';
+        localStorage.removeItem('faceapp_admin_token');
+        localStorage.removeItem('faceapp_admin_user');
+        setCurrentUser(null);
+        setLoggedIn(false);
+      }
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Error en la petición');
+      }
+
+      return data;
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      try {
+        loginMessage.textContent = 'Ingresando...';
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        const data = await apiFetch('/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password, deviceId })
+        });
+
+        if (data.requiresFace) {
+          loginMessage.textContent = 'Contraseña correcta. Verifica tu rostro para autorizar este dispositivo.';
+          await openFaceChallenge(data.challenge);
+          return;
+        }
+
+        token = data.token;
+        setCurrentUser(data.user);
+        localStorage.setItem('faceapp_admin_token', token);
+        localStorage.setItem('faceapp_admin_user', JSON.stringify(data.user));
+        setLoggedIn(true);
+        loginMessage.textContent = '';
+        if (data.faceSetupRequired) {
+          setPanel('admins');
+          adminMessage.textContent = 'Acceso inicial correcto. Registra tu rostro para activar el segundo factor.';
+        }
+        loadAdmins();
+        loadBiometricStatus();
+        loadClients();
+        loadServiceHealth();
+        loadAudit();
+      } catch (error) {
+        loginMessage.textContent = error.message;
+      }
+    });
+
+    document.querySelectorAll('#loginEmail, #loginPassword').forEach((input) => {
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          document.getElementById('loginBtn').click();
+        }
+      });
+    });
+
+    document.getElementById('createAdminBtn').addEventListener('click', async () => {
+      try {
+        adminMessage.textContent = 'Creando administrador...';
+        const fullName = document.getElementById('adminFullName').value;
+        const email = document.getElementById('adminEmail').value;
+        const password = document.getElementById('adminPassword').value;
+
+        await apiFetch('/admin/users', {
+          method: 'POST',
+          body: JSON.stringify({ fullName, email, password })
+        });
+
+        adminMessage.textContent = 'Administrador creado correctamente.';
+        document.getElementById('adminFullName').value = '';
+        document.getElementById('adminEmail').value = '';
+        document.getElementById('adminPassword').value = '';
+        loadAdmins();
+      } catch (error) {
+        adminMessage.textContent = error.message;
+      }
+    });
+
+    document.getElementById('createClientBtn').addEventListener('click', async () => {
+      try {
+        clientMessage.textContent = 'Creando cliente...';
+        const name = document.getElementById('clientName').value;
+        const email = document.getElementById('clientEmail').value;
+        const company = document.getElementById('clientCompany').value;
+
+        const data = await apiFetch('/admin/clients', {
+          method: 'POST',
+          body: JSON.stringify({ name, email, company })
+        });
+
+        clientMessage.textContent = 'Cliente creado correctamente.';
+        document.getElementById('clientName').value = '';
+        document.getElementById('clientEmail').value = '';
+        document.getElementById('clientCompany').value = '';
+        loadClients();
+      } catch (error) {
+        clientMessage.textContent = error.message;
+      }
+    });
+
+    document.getElementById('createKeyBtn').addEventListener('click', async () => {
+      try {
+        const clientId = document.getElementById('keyClientId').value;
+        const keyName = document.getElementById('keyName').value;
+        const selectedScopes = document.getElementById('keyScopes').value;
+
+        const data = await apiFetch(`/admin/clients/${clientId}/keys`, {
+          method: 'POST',
+          body: JSON.stringify({
+            name: keyName,
+            scopes: selectedScopes.split(',').map((item) => item.trim()).filter(Boolean)
+          })
+        });
+
+        keyOutput.textContent = JSON.stringify(data, null, 2);
+        loadClients();
+      } catch (error) {
+        keyOutput.textContent = error.message;
+      }
+    });
+
+    document.getElementById('refreshClientsBtn').addEventListener('click', loadClients);
+    document.getElementById('refreshAuditBtn').addEventListener('click', loadAudit);
+
+    async function toggleAdminStatus(adminId, currentStatus) {
+      const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      try {
+        await apiFetch(`/admin/users/${adminId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: nextStatus })
+        });
+        loadAdmins();
+      } catch (error) {
+        adminMessage.textContent = error.message;
+      }
+    }
+
+    async function loadAdmins() {
+      try {
+        const data = await apiFetch('/admin/users');
+        adminsTableBody.innerHTML = '';
+        adminCount.textContent = data.admins.filter((admin) => admin.status === 'active').length;
+
+        data.admins.forEach((admin) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${admin.full_name}</td>
+            <td>${admin.email}</td>
+            <td>${admin.status}</td>
+            <td><button data-admin-id="${admin.id}" data-admin-status="${admin.status}" class="toggleAdminBtn">${admin.status === 'active' ? 'Desactivar' : 'Activar'}</button></td>
+          `;
+          adminsTableBody.appendChild(row);
+        });
+
+        document.querySelectorAll('.toggleAdminBtn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            toggleAdminStatus(btn.getAttribute('data-admin-id'), btn.getAttribute('data-admin-status'));
+          });
+        });
+        loadApprovals();
+      } catch (error) {
+        adminsTableBody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
+      }
+    }
+
+    async function loadApprovals() {
+      try {
+        const data = await apiFetch('/admin/device-approvals');
+        if (!data.requests.length) {
+          approvalsList.innerHTML = '<span class="subtle">No hay solicitudes pendientes.</span>';
+          return;
+        }
+
+        approvalsList.innerHTML = data.requests.map((request) => `
+          <div class="approval-item">
+            <div class="approval-info"><strong>${request.full_name}</strong><span>${request.email} · Dispositivo nuevo</span></div>
+            <button class="approveDeviceBtn action-primary" data-approval-id="${request.id}">Aprobar</button>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.approveDeviceBtn').forEach((button) => {
+          button.addEventListener('click', async () => {
+            button.disabled = true;
+            try {
+              await apiFetch(`/admin/device-approvals/${button.dataset.approvalId}/approve`, { method: 'POST' });
+              loadApprovals();
+            } catch (error) {
+              button.disabled = false;
+              adminMessage.textContent = error.message;
+            }
+          });
+        });
+      } catch (error) {
+        approvalsList.innerHTML = `<span class="subtle">${error.message}</span>`;
+      }
+    }
+
+    document.getElementById('refreshApprovalsBtn').addEventListener('click', loadApprovals);
+
+    async function toggleClientStatus(clientId, currentStatus) {
+      const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      await apiFetch(`/admin/clients/${clientId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus })
+      });
+      loadClients();
+    }
+
+    async function clearClientFaceRecords(clientId, clientName, button, countElement, messageElement) {
+      if (!confirm(`¿Vaciar todos los registros faciales de ${clientName}? Esta acción no elimina sus API keys.`)) return;
+
+      button.disabled = true;
+      messageElement.textContent = 'Eliminando...';
+      messageElement.style.color = 'var(--muted)';
+      try {
+        const data = await apiFetch(`/admin/clients/${clientId}/face-records`, { method: 'DELETE' });
+        countElement.textContent = '0';
+        messageElement.textContent = data.deletedCount > 0
+          ? `${data.deletedCount} eliminados`
+          : 'Ya estaba vacío';
+        messageElement.style.color = 'var(--green)';
+        adminMessage.textContent = data.message;
+        button.disabled = false;
+      } catch (error) {
+        messageElement.textContent = error.message;
+        messageElement.style.color = 'var(--red)';
+        adminMessage.textContent = error.message;
+        button.disabled = false;
+      }
+    }
+
+    async function toggleKeyStatus(keyId, currentStatus) {
+      const nextStatus = currentStatus === 'active' ? 'revoked' : 'active';
+      const button = document.querySelector(`.toggleKeyBtn[data-key-id="${keyId}"]`);
+      if (button) button.disabled = true;
+
+      try {
+        await apiFetch(`/admin/keys/${keyId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: nextStatus })
+        });
+        adminMessage.textContent = nextStatus === 'revoked' ? 'API key revocada correctamente.' : 'API key activada correctamente.';
+        await loadClients();
+      } catch (error) {
+        adminMessage.textContent = error.message;
+        if (button) button.disabled = false;
+      }
+    }
+
+    async function loadClients() {
+      try {
+        const data = await apiFetch('/admin/clients');
+        clientsTableBody.innerHTML = '';
+        clientCount.textContent = data.clients.length;
+        activeClientCount.textContent = data.clients.filter((client) => client.status === 'active').length;
+        keyCount.textContent = data.clients.reduce((total, client) => total + (client.apiKeys || []).filter((key) => key.status === 'active').length, 0);
+
+        data.clients.forEach((client) => {
+          const keysMarkup = (client.apiKeys || []).length
+            ? (client.apiKeys || []).map((key) => `
+                <details class="key-item">
+                  <summary class="key-heading"><strong>${key.name}</strong><span class="status status-${key.status}">${key.status}</span></summary>
+                  <div class="key-details">
+                    <div class="permission-list">${(key.scopes || []).map((scope) => `<span class="permission" title="${scope}">${scopeLabels[scope] || scope}</span>`).join('')}</div>
+                    <button data-key-id="${key.id}" data-key-status="${key.status}" class="toggleKeyBtn ${key.status === 'active' ? 'action-danger' : 'action-muted'}">${key.status === 'active' ? 'Revocar key' : 'Activar key'}</button>
+                  </div>
+                </details>
+              `).join('')
+            : '<span class="subtle">Sin API keys</span>';
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${client.id}</td>
+            <td>${client.name}</td>
+            <td>${client.email}</td>
+            <td>${client.company || '-'}</td>
+            <td><span class="status status-${client.status}">${client.status}</span></td>
+            <td><strong data-face-count="${client.id}">${client.face_record_count || 0}</strong></td>
+            <td><div class="key-list">${keysMarkup}</div></td>
+            <td>
+              <div class="action-group">
+                <button data-client-id="${client.id}" class="clientKeyBtn action-primary">Generar key</button>
+                <button data-client-id="${client.id}" data-client-name="${client.name}" class="clearFaceRecordsBtn action-danger">Vaciar rostros</button>
+                <span data-face-message="${client.id}" class="face-action-message" aria-live="polite"></span>
+                <button data-client-status="${client.status}" data-client-id="${client.id}" class="toggleClientBtn ${client.status === 'active' ? 'action-danger' : 'action-muted'}">${client.status === 'active' ? 'Desactivar' : 'Activar'}</button>
+              </div>
+            </td>
+          `;
+          clientsTableBody.appendChild(row);
+        });
+
+        document.querySelectorAll('.clientKeyBtn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            openKeyGenerator(btn.getAttribute('data-client-id'));
+          });
+        });
+
+        document.querySelectorAll('.toggleClientBtn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            toggleClientStatus(btn.getAttribute('data-client-id'), btn.getAttribute('data-client-status'));
+          });
+        });
+
+        document.querySelectorAll('.clearFaceRecordsBtn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            clearClientFaceRecords(
+              btn.getAttribute('data-client-id'),
+              btn.getAttribute('data-client-name'),
+              btn,
+              document.querySelector(`[data-face-count="${btn.getAttribute('data-client-id')}"]`),
+              document.querySelector(`[data-face-message="${btn.getAttribute('data-client-id')}"]`)
+            );
+          });
+        });
+
+        document.querySelectorAll('.toggleKeyBtn').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            await toggleKeyStatus(btn.getAttribute('data-key-id'), btn.getAttribute('data-key-status'));
+          });
+        });
+      } catch (error) {
+        clientsTableBody.innerHTML = `<tr><td colspan="8">${error.message}</td></tr>`;
+      }
+    }
+
+    async function loadServiceHealth() {
+      try {
+        const response = await fetch('/health');
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || 'Base de datos no disponible');
+        }
+
+        serviceStatus.textContent = 'Activo';
+        serviceStatus.className = 'stat-value green';
+        serviceDetail.textContent = 'API y base de datos conectadas';
+      } catch (error) {
+        serviceStatus.textContent = 'Degradado';
+        serviceStatus.className = 'stat-value red';
+        serviceDetail.textContent = error.message;
+      }
+    }
+
+    async function loadAudit() {
+      try {
+        const data = await apiFetch('/admin/audit');
+        auditOutput.textContent = JSON.stringify(data.logs, null, 2);
+      } catch (error) {
+        auditOutput.textContent = error.message;
+      }
+    }
+  </script>
+</body>
+</html>

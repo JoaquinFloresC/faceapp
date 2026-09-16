@@ -1,0 +1,16 @@
+{
+  "name": "faceapp-rostros",
+  "version": "1.0.0",
+  "description": "Microservicio de reconocimiento facial con PostgreSQL pgvector",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "face-api.js": "^0.22.2",
+    "pg": "^8.13.1"
+  }
+}

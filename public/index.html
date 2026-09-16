@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>FaceCore API | Reconocimiento facial</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+    :root { --ink:#17211b; --muted:#65736a; --paper:#f4f7f1; --card:#fff; --line:#d9e2d8; --lime:#d7f36a; --green:#1d6b4b; --dark:#17382d; --coral:#ed8b68; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:'DM Sans',sans-serif; line-height:1.5; }
+    .container { width:min(1180px,calc(100% - 40px)); margin:0 auto; }
+    .topbar { position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; padding:18px 0; border-bottom:1px solid rgba(217,226,216,.85); background:rgba(244,247,241,.94); backdrop-filter:blur(12px); }
+    .brand { display:flex; align-items:center; gap:10px; color:var(--dark); font-family:'Space Grotesk',sans-serif; font-weight:700; text-decoration:none; }
+    .brand-mark { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--lime); }
+    .nav { display:flex; gap:24px; font-size:14px; font-weight:600; } .nav a { color:var(--muted); text-decoration:none; }
+    .eyebrow { color:var(--green); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+    .hero { display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center; padding:76px 0 90px; }
+    h1,h2,h3 { font-family:'Space Grotesk',sans-serif; letter-spacing:-.045em; line-height:1.05; } h1 { margin:16px 0 22px; font-size:clamp(48px,7vw,86px); } h2 { margin:0 0 14px; font-size:clamp(30px,4vw,46px); } h3 { margin:0 0 9px; font-size:21px; }
+    .hero-copy { max-width:560px; color:var(--muted); font-size:18px; } .hero-actions { display:flex; gap:12px; margin-top:30px; }
+    .button { display:inline-flex; border-radius:8px; padding:12px 18px; font-weight:700; text-decoration:none; } .button.primary { background:var(--dark); color:#fff; } .button.light { background:var(--lime); color:var(--dark); }
+    .hero-visual { min-height:340px; padding:28px; border-radius:18px; background:var(--dark); } .terminal { border:1px solid rgba(255,255,255,.16); border-radius:10px; padding:20px; color:#d9f5dc; font:13px/1.8 ui-monospace,monospace; } .terminal-bar { color:#9eb7a6; margin-bottom:20px; } .key { color:var(--lime); } .value { color:#f9c7a8; }
+    .section { padding:86px 0; } .section-heading { display:flex; align-items:end; justify-content:space-between; gap:24px; margin-bottom:30px; } .section-heading p { max-width:400px; color:var(--muted); margin:0; }
+    .cards,.endpoint-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; } .endpoint-grid { grid-template-columns:repeat(2,1fr); } .card { padding:24px; border:1px solid var(--line); border-radius:10px; background:var(--card); } .card p { color:var(--muted); margin:0; } .number { margin-bottom:32px; color:var(--coral); font-weight:700; }
+    .endpoint { padding:26px; border-radius:10px; color:#fff; background:var(--dark); } .endpoint p { color:#bdd0c2; } .method { display:inline-block; padding:5px 8px; border-radius:5px; color:var(--dark); background:var(--lime); font:700 12px ui-monospace,monospace; } pre { overflow-x:auto; margin:20px 0 0; padding:16px; border-radius:7px; color:#d9f5dc; background:#102a21; font-size:12px; }
+    .controls { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:16px; } input,button { padding:10px 14px; border:1px solid var(--line); border-radius:8px; font:inherit; } input { min-width:180px; color:var(--ink); background:var(--paper); } button { cursor:pointer; color:#fff; background:var(--green); font-weight:700; } button.secondary { background:var(--coral); } .status { min-height:52px; margin-top:16px; padding:12px; border-radius:8px; color:#fff; background:var(--dark); white-space:pre-wrap; }
+    .footer { padding:26px 0 40px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+    @media (max-width:800px) { .nav{display:none;} .hero{grid-template-columns:1fr;padding:44px 0 60px;} .cards,.endpoint-grid{grid-template-columns:1fr;} .section{padding:60px 0;} .section-heading{display:block;} .section-heading p{margin-top:14px;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar"><a class="brand" href="#inicio"><span class="brand-mark">✦</span> FaceCore API</a><nav class="nav" aria-label="Navegación principal"><a href="#como-funciona">Cómo funciona</a><a href="#endpoints">Endpoints</a></nav></header>
+    <main id="inicio">
+      <section class="hero"><div><div class="eyebrow">API de reconocimiento facial</div><h1>Identifica personas con una llamada.</h1><p class="hero-copy">FaceCore registra varias muestras del rostro en embeddings de 128 dimensiones y devuelve una decisión de identidad para verificar asistencia.</p><div class="hero-actions"><a class="button primary" href="#endpoints">Ver endpoints</a></div></div><div class="hero-visual" aria-label="Ejemplo de respuesta de la API"><div class="terminal"><div class="terminal-bar">POST /api/rostros/identificar</div><div>{</div><div>&nbsp;&nbsp;<span class="key">"encontrado"</span>: <span class="value">true</span>,</div><div>&nbsp;&nbsp;<span class="key">"usuario_id"</span>: <span class="value">42</span>,</div><div>&nbsp;&nbsp;<span class="key">"ambigua"</span>: <span class="value">false</span></div><div>}</div></div></div></section>
+      <section class="section" id="como-funciona"><div class="section-heading"><div><div class="eyebrow">Una integración sencilla</div><h2>Del rostro a la respuesta.</h2></div><p>El cliente envía embeddings, PHP protege la sesión y Node.js consulta PostgreSQL con pgvector.</p></div><div class="cards"><article class="card"><div class="number">01 / REGISTRO</div><h3>Guarda varias muestras</h3><p>Envía de 1 a 10 embeddings de 128 valores para representar distintas poses del mismo usuario.</p></article><article class="card"><div class="number">02 / AUTENTICACIÓN</div><h3>Protege la petición</h3><p>Usa <code>Authorization: ApiKey &lt;tu_api_key&gt;</code> o el header <code>X-API-Key</code>.</p></article><article class="card"><div class="number">03 / DECISIÓN</div><h3>Obtén una respuesta</h3><p>La API compara con distancia euclidiana, aplica el umbral <code>0.60</code> y rechaza coincidencias ambiguas.</p></article></div></section>
+      <section class="section" id="endpoints"><div class="section-heading"><div><div class="eyebrow">Referencia rápida</div><h2>Dos endpoints, un flujo.</h2></div><p>Ambos requieren API key. Cada vector facial debe contener exactamente 128 valores numéricos.</p></div><div class="endpoint-grid"><article class="endpoint"><span class="method">POST</span><h3>Registrar rostro</h3><p>Asocia entre 1 y 10 muestras a un usuario. También acepta el campo antiguo <code>embedding</code> para una sola muestra.</p><pre><code>POST /api/rostros/registrar
+    Authorization: ApiKey &lt;tu_api_key&gt;
+
+{
+  "usuario_id": 42,
+  "embeddings": [
+    [0.12, -0.08, ... 125 valores más ...],
+    [0.10, -0.06, ... 125 valores más ...]
+  ]
+}
+
+Respuesta: { "ok": true, "muestras": [...] }</code></pre></article><article class="endpoint"><span class="method">POST</span><h3>Identificar rostro</h3><p>Busca la muestra más cercana. Acepta si la distancia euclidiana es menor que <code>0.60</code> y no hay ambigüedad.</p><pre><code>POST /api/rostros/identificar
+Authorization: ApiKey &lt;tu_api_key&gt;
+
+{
+  "embedding": [0.12, -0.08, ... 125 valores más ...]
+}
+
+Respuesta: {
+  "encontrado": true,
+  "usuario_id": 42,
+  "distancia_euclidiana": 0.42,
+  "ambigua": false
+}</code></pre></article></div></section>
+    </main>
+    <footer class="footer">FaceCore API · Reconocimiento facial para integraciones web</footer>
+  </div>
+</body>
+</html>
